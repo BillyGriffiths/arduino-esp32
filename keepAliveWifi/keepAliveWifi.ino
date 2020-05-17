@@ -51,7 +51,6 @@ void loop()
  * Task keepAliveWifi()
  *
  * Check and keep-alive the WiFi connection
- * Note: portTICK_PERIOD_MS =
  */
 void keepAliveWifi(void * parameter)
 {
