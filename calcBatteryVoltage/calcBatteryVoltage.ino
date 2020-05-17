@@ -7,7 +7,7 @@
 // define some constants
 #define VOLTAGE_PIN 35 //The pin we are reading voltage from
 #define VOLTAGE_SAMPLES 10 //The number of samples we want to base our calculation on
-#define VOLTAGE_CALCULATE_INTERVAL_MS 5000 //The number of samples we want to base our calculation on
+#define VOLTAGE_CALCULATE_INTERVAL_MS 5000 //How often we want to refresh the battery voltage reading
 #define SerialMon Serial
 
 //define some variables
