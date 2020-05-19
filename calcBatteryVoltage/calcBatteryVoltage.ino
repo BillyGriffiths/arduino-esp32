@@ -15,6 +15,7 @@ float batteryVoltage;
 
 // define tasks
 void calcBatteryVoltage(void * parameter);
+void logBatteryVoltage(void * parameter);
 
 // the setup function runs once when you press reset or power the board
 void setup()
@@ -24,20 +25,27 @@ void setup()
   delay(10);
 
   // the tasks to schedule:
-  xTaskCreate (
-    calcBatteryVoltage,     // The task
-    "checkBatteryVoltage",  // A friendly "human readable" task name
-    10000,                  // Stack size (memory allocation)
-    NULL,                   // Parameters
-    1,                      // Task priority
-    NULL);                  // Task handle
+    xTaskCreate (
+        calcBatteryVoltage,     // The task
+        "checkBatteryVoltage",  // A friendly "human readable" task name
+        10000,                  // Stack size (memory allocation)
+        NULL,                   // Parameters
+        1,                      // Task priority
+        NULL                    // Task handle
+    );
+    xTaskCreate (
+        logBatteryVoltage,      // The task
+        "logBatteryVoltage",    // A friendly "human readable" task name
+        5000,                   // Stack size (memory allocation)
+        NULL,                   // Parameters
+        1,                      // Task priority
+        NULL                    // Task handle
+    );
  }
 
 void loop()
 {
-    //read the calculated battery voltage every 5 seconds and output to serial
-    Serial.println("[calcBatteryVoltage] " + (String)batteryVoltage + "V");
-    delay(5000);
+  //nothing to do here, everything gets done in tasks
 }
 
 /*--------------------------------------------------*/
@@ -45,7 +53,29 @@ void loop()
 /*--------------------------------------------------*/
 
 /**
+ * Task logBatteryVoltage()
+ *
+ * Write the calculated battery voltage to serial
+ */
+void logBatteryVoltage(void * parameter)
+{
+    //do this forever
+    for(;;)
+    {
+        if (batteryVoltage > 0) {
+            SerialMon.println("[batteryVoltage] " + (String)batteryVoltage + "V");
+        } else {
+           SerialMon.println("[batteryVoltage] Waiting for measurement...");
+        }
+
+        vTaskDelay(5000 / portTICK_PERIOD_MS); //write the calculated value to serial every 5 seconds
+    }
+}
+
+/**
  * Task calcBatteryVoltage()
+ *
+ * Calculates the battery voltage
  */
 void calcBatteryVoltage(void * parameter)
 {
@@ -53,7 +83,7 @@ void calcBatteryVoltage(void * parameter)
     for(;;)
     {
         //take VOLTAGE_SAMPLES amount of samples and get the average
-        int16_t avgReading = 0;
+        int16_t avgReading = 0; //change this to (int32_t) if you increase VOLTAGE_SAMPLES
         for (int i = 0; i < VOLTAGE_SAMPLES; i++) {
           avgReading = avgReading + analogRead(VOLTAGE_PIN);
           delay(15);
